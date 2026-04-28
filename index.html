@@ -373,8 +373,11 @@ async function forceSync() {
       api({ action:'getTransactions', month:mk }),
       api({ action:'getLimits' })
     ]);
-    if (txRes.transactions) {
-      transactions = txRes.transactions;
+    if (txRes.transactions !== undefined) {
+      // Reemplazar solo las transacciones del mes actual con lo que viene del servidor
+      // Mantener transacciones de otros meses que estén en local
+      const otherMonths = transactions.filter(t => getMonthKey(t.date) !== mk);
+      transactions = [...otherMonths, ...txRes.transactions];
       localStorage.setItem(LS_TX, JSON.stringify(transactions));
     }
     if (limRes.limits && Object.keys(limRes.limits).length > 0) {
