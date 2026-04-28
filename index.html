@@ -553,14 +553,17 @@ async function saveTransaction(){
   const btn=document.getElementById('btnSaveTx');
   btn.disabled=true; btn.textContent='Guardando…';
 
+  // Capturar catId ANTES de cerrar el modal
+  const catId = activeCatId;
+
   // Guardar local primero (optimistic)
-  const txLocal={id:'local_'+Date.now(),cat:activeCatId,amount,date,user};
+  const txLocal={id:'local_'+Date.now(),cat:catId,amount,date,user};
   transactions.push(txLocal);
   localStorage.setItem(LS_TX,JSON.stringify(transactions));
   closeModal(); renderDashboard();
 
   try {
-    const res=await api({action:'addTransaction',cat:activeCatId,amount,date,user});
+    const res=await api({action:'addTransaction',cat:catId,amount,date,user});
     if(res.id){
       const idx=transactions.findIndex(t=>t.id===txLocal.id);
       if(idx>=0) transactions[idx].id=res.id;
@@ -568,8 +571,8 @@ async function saveTransaction(){
     }
   } catch(_){}
 
-  const mk=currentMonthKey(),spent=spentByMonth(mk),pct=spent[activeCatId]/limits[activeCatId];
-  const cat=CATS.find(c=>c.id===activeCatId);
+  const mk=currentMonthKey(),spent=spentByMonth(mk),pct=spent[catId]/limits[catId];
+  const cat=CATS.find(c=>c.id===catId);
   if(pct>=1) showToast(`⚠️ Límite de ${cat.name} superado`);
   else if(pct>=.8) showToast(`${cat.name}: 80% del límite`);
   else showToast('Gasto registrado ✓');
