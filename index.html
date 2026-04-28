@@ -374,11 +374,11 @@ async function forceSync() {
       api({ action:'getLimits' })
     ]);
     if (txRes.transactions !== undefined) {
-      // Reemplazar solo las transacciones del mes actual con lo que viene del servidor
-      // Mantener transacciones de otros meses que estén en local
       const otherMonths = transactions.filter(t => getMonthKey(t.date) !== mk);
-      transactions = [...otherMonths, ...txRes.transactions];
+      const serverTx = txRes.transactions;
+      transactions = [...otherMonths, ...serverTx];
       localStorage.setItem(LS_TX, JSON.stringify(transactions));
+      showToast('Servidor: ' + serverTx.length + ' gastos este mes');
     }
     if (limRes.limits && Object.keys(limRes.limits).length > 0) {
       limits = { ...Object.fromEntries(CATS.map(c=>[c.id,c.default])), ...limRes.limits };
